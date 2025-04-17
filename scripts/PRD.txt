@@ -1,0 +1,82 @@
+<context>
+# Overview  
+Khôra Game Companion App is a web application designed to enhance the experience of playing the Khôra board game. It enables players to manage game sessions, track individual and group performance, and streamline gameplay through digital tools. The app is targeted at current Khôra players and groups of friends who regularly play the game, providing value by simplifying session management, automating scorekeeping, and offering persistent statistics.
+
+# Core Features  
+1. **User Account Management**  
+   - Registration and login via email/password (Supabase authentication).
+   - User profiles with username, optional avatar, and game statistics (victories, total points, etc.).
+   - Importance: Enables personalized experience and persistent tracking.
+   - High-level: Users sign up, log in, and view/edit their profile and stats.
+
+2. **Game Session Management**  
+   - Create and join game rooms with unique, shareable URLs.
+   - Host controls for starting, pausing, and ending sessions.
+   - Importance: Simplifies group coordination and session continuity.
+   - High-level: Host creates a room, shares link, others join, host manages session state.
+
+3. **Gameplay Interaction**  
+   - Digital support for all game phases (event, tax, dice, actions, progress, resolution, achievements).
+   - Manual input for dice results; action and score calculators.
+   - Importance: Reduces manual errors, speeds up play, and clarifies rules.
+   - High-level: App guides users through each phase, calculates scores, and tracks achievements.
+
+4. **Score and Victory Tracking**  
+   - Persistent storage of game results and user statistics.
+   - Historical scores, wins, and performance analytics.
+   - Importance: Encourages competition and improvement.
+   - High-level: Results auto-saved, stats viewable in profiles.
+
+5. **Notifications and Alerts**  
+   - In-game notifications for phase changes, achievements, and end-of-game summaries.
+   - Importance: Keeps players informed and engaged.
+   - High-level: Real-time alerts during gameplay.
+
+# User Experience  
+- **Personas**: Khôra enthusiasts, casual board gamers, competitive groups.
+- **Key Flows**: Sign up/login → Create/join game → Play and track rounds → View results and stats.
+- **UI/UX**: Minimalist, Ancient Greece-inspired design; responsive for desktop/mobile; clear actionable indicators.
+</context>
+<PRD>
+# Technical Architecture  
+- **Frontend**: Next.js (React) with Tailwind CSS for styling.
+- **Backend**: Supabase for authentication, database, and real-time features.
+- **Data Models**:
+  - Users: id (UUID), username, email, avatar_url, created_at
+  - Games: id (UUID), host_id, game_url, created_at, ended_at
+  - Game Participants: id (UUID), game_id, user_id, points_scored, victory
+- **APIs/Integrations**: Supabase Auth, Supabase Realtime, RESTful endpoints for game/session management.
+- **Infrastructure**: Hosted on Vercel or similar; Supabase cloud backend.
+
+# Development Roadmap  
+- **MVP Requirements**:
+  1. App setup with Next.js, Tailwind CSS, and Supabase integration
+  2. User authentication and profile management
+  3. Game room creation/joining with unique URLs
+  4. Basic gameplay phase tracking and manual score input
+  5. Persistent storage of game results and user stats
+  6. In-game notifications for phase changes and achievements
+- **Future Enhancements**:
+  - Real-time chat
+  - AI-driven strategy tips
+  - Expansion packs/additional modes
+
+# Logical Dependency Chain
+1. Foundation: App setup, authentication, and user profiles
+2. Game session management (create/join rooms)
+3. Gameplay phase tracking and score calculation
+4. Persistent statistics and historical data
+5. Notifications and alerts
+6. Future: Chat, AI, expansions
+- Focus on quickly delivering a usable game session and score tracking experience, then layering advanced features.
+
+# Risks and Mitigations  
+- **Technical**: Real-time sync issues (Mitigation: Use Supabase Realtime, test thoroughly)
+- **MVP Scope**: Overcomplicating initial features (Mitigation: Prioritize core flows, defer enhancements)
+- **Resource**: Limited dev/design resources (Mitigation: Use proven frameworks, minimalist design)
+
+# Appendix  
+- **Research**: Board game companion app best practices, Supabase documentation
+- **Technical Specs**: See data schema and stack above
+- **Constraints**: Players roll dice physically and enter results; app augments but does not replace the board game
+</PRD> 
