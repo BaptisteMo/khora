@@ -10,17 +10,49 @@ import { supabase } from '@/lib/supabase';
 import { ActionType, SCORING_RULES, isLegalAction, ScoreCalculator } from '@/lib/scoring';
 import Notification from '@/components/ui/Notification';
 
+// Define types for game, participants, and player actions
+interface ParticipantType {
+  id: string;
+  user_id: string;
+  score: number | null;
+  dice_result?: string;
+  users: {
+    id: string;
+    username?: string;
+    email?: string;
+  };
+}
+interface GameType {
+  id: string;
+  title: string;
+  host_id: string;
+  game_url: string;
+  created_at: string;
+  ended_at?: string;
+  status: string;
+  settings?: Record<string, any>;
+  winner_id?: string;
+  participants?: ParticipantType[];
+}
+interface PlayerActionType {
+  userId: string;
+  actionType: ActionType;
+  value: number;
+  phase: string;
+  timestamp: string;
+}
+
 export default function GameDetail({ params }: { params: Promise<{ id: string }> }) {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const unwrappedParams = use(params);
-  const [game, setGame] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [game, setGame] = useState<GameType | null>(null);
+  const [participants, setParticipants] = useState<ParticipantType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPhase, setCurrentPhase] = useState<string>('setup');
   const [isHost, setIsHost] = useState(false);
-  const [playerActions, setPlayerActions] = useState<any[]>([]);
+  const [playerActions, setPlayerActions] = useState<PlayerActionType[]>([]);
   const [selectedActionType, setSelectedActionType] = useState<ActionType | ''>('');
   const [actionValue, setActionValue] = useState<number>(1);
   const [actionFeedback, setActionFeedback] = useState<string>('');
@@ -127,8 +159,12 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         setCurrentPhase(gameData.settings.phase);
       }
 
-    } catch (error: any) {
-      setError(error?.message || 'Failed to load game data');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to load game data');
+      } else {
+        setError('Failed to load game data');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -153,8 +189,12 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
       setGame(updatedGame);
       setCurrentPhase(nextPhase);
 
-    } catch (error: any) {
-      setError(error?.message || 'Failed to update game phase');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to update game phase');
+      } else {
+        setError('Failed to update game phase');
+      }
     }
   };
 
@@ -167,8 +207,12 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
       // Refresh participants data
       const participantsData = await listParticipants(game.id);
       setParticipants(participantsData);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to update player score');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to update player score');
+      } else {
+        setError('Failed to update player score');
+      }
     }
   };
 
@@ -179,8 +223,12 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
       // Refresh participants data
       const participantsData = await listParticipants(game.id);
       setParticipants(participantsData);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to update dice result');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to update dice result');
+      } else {
+        setError('Failed to update dice result');
+      }
     }
   };
 
@@ -203,8 +251,12 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
       // Redirect to dashboard
       router.push('/dashboard');
       
-    } catch (error: any) {
-      setError(error?.message || 'Failed to end game');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to end game');
+      } else {
+        setError('Failed to end game');
+      }
     }
   };
 
@@ -297,7 +349,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         {notification && (
           <Notification
             message={notification.message}
-            type={notification.type as any}
+            type={notification.type as NotificationType | undefined}
             onClose={() => setNotification(null)}
           />
         )}

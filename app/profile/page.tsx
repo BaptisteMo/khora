@@ -8,6 +8,14 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { updateUser } from '@/lib/database';
 
+// Define type for user stats
+interface UserStatsType {
+  gamesPlayed: number;
+  gamesWon: number;
+  winRate: number;
+  averageScore: number;
+}
+
 export default function Profile() {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const router = useRouter();
@@ -15,7 +23,7 @@ export default function Profile() {
   const [username, setUsername] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [userStats, setUserStats] = useState<any>({
+  const [userStats, setUserStats] = useState<UserStatsType>({
     gamesPlayed: 0,
     gamesWon: 0,
     winRate: 0,
@@ -102,8 +110,12 @@ export default function Profile() {
         });
       }
 
-    } catch (error: any) {
-      setError(error?.message || 'Failed to load profile data');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to load profile data');
+      } else {
+        setError('Failed to load profile data');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -129,8 +141,12 @@ export default function Profile() {
       });
 
       setIsEditing(false);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to update profile');
+      } else {
+        setError('Failed to update profile');
+      }
     } finally {
       setIsUpdating(false);
     }

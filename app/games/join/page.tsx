@@ -54,8 +54,13 @@ export default function JoinGame() {
 
       // Redirect to the game page
       router.push(`/games/${game.id}`);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to join game');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to join game');
+      } else {
+        setError('Failed to join game');
+      }
+    } finally {
       setIsJoining(false);
     }
   };

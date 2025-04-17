@@ -87,7 +87,7 @@ export const getGameByUrl = async (gameUrl: string) => {
 export const updateGame = async (id: string, gameData: {
   title?: string;
   status?: string;
-  settings?: any;
+  settings?: Record<string, unknown>;
   ended_at?: string;
   winner_id?: string;
 }) => {

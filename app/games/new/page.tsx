@@ -53,8 +53,13 @@ export default function NewGame() {
 
       // Redirect to the game page
       router.push(`/games/${game.id}`);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to create game');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to create game');
+      } else {
+        setError('Failed to create game');
+      }
+    } finally {
       setIsCreating(false);
     }
   };

@@ -8,10 +8,32 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+// Define the GameType interface for game objects
+interface GameType {
+  id: string;
+  title: string;
+  host_id: string;
+  game_url: string;
+  created_at: string;
+  ended_at?: string;
+  status: string;
+  settings?: Record<string, unknown>;
+  winner_id?: string;
+  participants?: Array<{
+    id: string;
+    user_id: string;
+    score: number | null;
+    users: {
+      id: string;
+      email: string;
+    };
+  }>;
+}
+
 export default function GameList() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [games, setGames] = useState<any[]>([]);
+  const [games, setGames] = useState<GameType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
@@ -73,8 +95,12 @@ export default function GameList() {
       if (gamesError) throw gamesError;
 
       setGames(gamesData || []);
-    } catch (error: any) {
-      setError(error?.message || 'Failed to load games');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to load games');
+      } else {
+        setError('Failed to load games');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,8 +168,8 @@ export default function GameList() {
           <div className="bg-white shadow-sm rounded-lg p-12 text-center">
             <h3 className="text-xl font-medium text-gray-900 mb-2">
               {activeTab === 'active' 
-                ? "You don't have any active games" 
-                : "You don't have any completed games"}
+                ? "You don&apos;t have any active games" 
+                : "You don&apos;t have any completed games"}
             </h3>
             <p className="text-gray-500 mb-6">
               {activeTab === 'active'

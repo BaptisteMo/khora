@@ -40,8 +40,12 @@ export default function RegisterForm() {
       if (error) throw error;
       
       setSuccess(true);
-    } catch (error: any) {
-      setError(error?.message || 'An error occurred during registration');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'An error occurred during registration');
+      } else {
+        setError('An error occurred during registration');
+      }
     } finally {
       setLoading(false);
     }

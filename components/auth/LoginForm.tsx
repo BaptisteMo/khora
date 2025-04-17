@@ -31,8 +31,12 @@ export default function LoginForm() {
       
       // Redirect to dashboard/home after successful login
       router.push('/dashboard');
-    } catch (error: any) {
-      setError(error?.message || 'Failed to sign in');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to sign in');
+      } else {
+        setError('Failed to sign in');
+      }
     } finally {
       setLoading(false);
     }
