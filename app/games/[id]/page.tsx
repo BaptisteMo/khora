@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useRef } from 'react';
+import { useState, useEffect, use, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/layout/Navbar';
@@ -30,7 +30,7 @@ interface GameType {
   created_at: string;
   ended_at?: string;
   status: string;
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
   winner_id?: string;
   participants?: ParticipantType[];
 }
@@ -61,7 +61,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
   const prevPhaseRef = useRef<string>(currentPhase);
 
   // Game phases
-  const phases = [
+  const phases = useMemo(() => [
     { id: 'setup', name: 'Setup' },
     { id: 'event', name: 'Event' },
     { id: 'tax', name: 'Tax' },
@@ -70,7 +70,33 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
     { id: 'progress', name: 'Progress' },
     { id: 'resolution', name: 'Resolution' },
     { id: 'achievement', name: 'Achievement' },
-  ];
+  ], []);
+
+  const loadGameData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // Fetch the game details
+      const gameData = await getGame(unwrappedParams.id);
+      setGame(gameData);
+      setIsHost(gameData.host_id === user?.id);
+      // Fetch the participants
+      const participantsData = await listParticipants(unwrappedParams.id);
+      setParticipants(participantsData);
+      // Set current phase from game settings or default to setup
+      if (gameData.settings && typeof gameData.settings === 'object' && 'phase' in gameData.settings) {
+        setCurrentPhase((gameData.settings as Record<string, unknown>).phase as string);
+      }
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError((error as { message?: string }).message || 'Failed to load game data');
+      } else {
+        setError('Failed to load game data');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [unwrappedParams.id, user]);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -140,36 +166,6 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.status]);
 
-  const loadGameData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Fetch the game details
-      const gameData = await getGame(unwrappedParams.id);
-      setGame(gameData);
-      setIsHost(gameData.host_id === user?.id);
-
-      // Fetch the participants
-      const participantsData = await listParticipants(unwrappedParams.id);
-      setParticipants(participantsData);
-
-      // Set current phase from game settings or default to setup
-      if (gameData.settings?.phase) {
-        setCurrentPhase(gameData.settings.phase);
-      }
-
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        setError((error as { message?: string }).message || 'Failed to load game data');
-      } else {
-        setError('Failed to load game data');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleNextPhase = async () => {
     if (!game || !isHost) return;
 
@@ -219,6 +215,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
   const updatePlayerDiceResult = async (userId: string, diceResult: string) => {
     if (!game) return;
     try {
+      // @ts-expect-error: allow dice_result for this call
       await updateParticipant(game.id, userId, { dice_result: diceResult });
       // Refresh participants data
       const participantsData = await listParticipants(game.id);
@@ -238,7 +235,9 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
     try {
       // Find highest scoring participant
       const highestScoringParticipant = participants.reduce((highest, current) => {
-        return (current.score > highest.score) ? current : highest;
+        const highScore = highest.score ?? 0;
+        const currScore = current.score ?? 0;
+        return (currScore > highScore) ? current : highest;
       }, participants[0]);
 
       // Update game status to completed and set winner
@@ -349,7 +348,6 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         {notification && (
           <Notification
             message={notification.message}
-            type={notification.type as NotificationType | undefined}
             onClose={() => setNotification(null)}
           />
         )}
@@ -578,7 +576,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
                 )}
                 {selectedActionType && !currentUserAction && (
                   <div className="text-sm text-gray-500 mb-2">
-                    This action will give you <b>{SCORING_RULES[selectedActionType]({ userId: user?.id, actionType: selectedActionType, value: actionValue, phase: currentPhase, timestamp: new Date().toISOString() })}</b> points.
+                    This action will give you <b>{SCORING_RULES[selectedActionType]({ userId: user?.id || '', actionType: selectedActionType, value: actionValue, phase: currentPhase, timestamp: new Date().toISOString() })}</b> points.
                   </div>
                 )}
                 {actionFeedback && (
@@ -622,7 +620,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
             
             {currentPhase === 'progress' && (
               <div>
-                <p className="text-gray-600 mb-4">Update your city's progress tracks based on your actions this round.</p>
+                <p className="text-gray-600 mb-4">Update your city&apos;s progress tracks based on your actions this round.</p>
                 {isHost && <p className="text-gray-600">As the host, you can advance to the next phase when all players have updated their progress.</p>}
               </div>
             )}

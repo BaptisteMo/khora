@@ -35,7 +35,7 @@ export const SCORING_RULES: Record<ActionType, (action: PlayerAction) => number>
   [ActionType.Philosophy]: (action) => action.value * 3, // Example: 3 points per philosophy action
   [ActionType.Progress]: (action) => action.value, // Example: 1 point per progress
   [ActionType.Tax]: (action) => action.value, // Example: 1 point per tax collected
-  [ActionType.Event]: (action) => 0, // Events may not directly score points
+  [ActionType.Event]: () => 0, // Events may not directly score points
   [ActionType.Achievement]: (action) => action.value * 5, // Example: 5 points per achievement
 };
 
