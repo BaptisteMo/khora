@@ -213,14 +213,14 @@ export default function GameList() {
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Winner:</span>
                         <span className="text-sm font-medium">
-                          {game.winner_id === user.id 
+                          {game.winner_id === user?.id 
                             ? 'You' 
                             : game.participants?.find(p => p.user_id === game.winner_id)?.users?.email || 'Unknown'}
                         </span>
                       </div>
                     )}
                     
-                    {game.host_id === user.id && (
+                    {game.host_id === user?.id && (
                       <div className="mt-3">
                         <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                           You are the host
