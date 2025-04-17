@@ -92,7 +92,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'games', filter: `id=eq.${unwrappedParams.id}` },
-          (payload) => {
+          () => {
             loadGameData();
           }
         )
@@ -104,7 +104,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'game_participants', filter: `game_id=eq.${unwrappedParams.id}` },
-          (payload) => {
+          () => {
             loadGameData();
           }
         )
@@ -115,7 +115,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
         supabase.removeChannel(participantsSub);
       };
     }
-  }, [authLoading, user, unwrappedParams.id, router]);
+  }, [authLoading, user, unwrappedParams.id, router, loadGameData]);
 
   useEffect(() => {
     if (prevPhaseRef.current !== currentPhase) {
@@ -127,7 +127,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
       });
       prevPhaseRef.current = currentPhase;
     }
-  }, [currentPhase]);
+  }, [currentPhase, phases]);
 
   useEffect(() => {
     if (game && game.status === 'completed') {
@@ -636,7 +636,7 @@ export default function GameDetail({ params }: { params: Promise<{ id: string }>
             
             {currentPhase === 'achievement' && (
               <div>
-                <p className="text-gray-600 mb-4">Check if any players have completed achievements and award victory points accordingly.</p>
+                <p className="text-gray-600 mb-4">Check if any players have completed achievements and award victory points accordingly.&apos;</p>
                 {isHost && <p className="text-gray-600">As the host, you can advance to the next phase when all achievements have been checked.</p>}
               </div>
             )}

@@ -38,7 +38,7 @@ export const deleteUser = async (id: string) => {
 export const createGame = async (gameData: { 
   host_id: string; 
   title: string;
-  settings?: any;
+  settings?: Record<string, unknown>;
   status?: string;
 }) => {
   // Generate a unique game URL

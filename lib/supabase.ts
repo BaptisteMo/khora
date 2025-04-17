@@ -38,7 +38,7 @@ export type Database = {
           ended_at: string | null;
           title: string;
           status: string;
-          settings: any;
+          settings: unknown;
           winner_id: string | null;
         };
         Insert: {
@@ -49,7 +49,7 @@ export type Database = {
           ended_at?: string | null;
           title: string;
           status?: string;
-          settings?: any;
+          settings?: unknown;
           winner_id?: string | null;
         };
         Update: {
@@ -59,7 +59,7 @@ export type Database = {
           ended_at?: string | null;
           title?: string;
           status?: string;
-          settings?: any;
+          settings?: unknown;
           winner_id?: string | null;
         };
       };
